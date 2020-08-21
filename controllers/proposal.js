@@ -4,12 +4,17 @@ module.exports = {
     createNewProposal: async (req, res) => {
         try {
             let proposal = req.body;
-            let result = await db.ref('proposals')
+            let result;
+            if (proposal.network == "kovan") {
+                result = await db.ref('proposals')
                 .child(proposal.topicKey)
                 .set(proposal);
-
-            console.log(result);
-
+            } else if (proposal.network == "mainnet") {
+                result = await db.ref('proposals_mainnet')
+                .child(proposal.topicKey)
+                .set(proposal);
+            }
+            
             res.json({
                 success: true,
                 response: result
@@ -24,7 +29,11 @@ module.exports = {
 
     getProposals: async (req, res) => {
         try {
-            let ref = db.ref('proposals');
+            let ref;
+            if (req.query.network == 'kovan') 
+                ref = db.ref('proposals');
+            else if (req.query.network == 'mainnet')
+                ref = db.ref('proposals_mainnet');
             let proposals = [];
             ref.once('value').then(function(snapshot) {
                 let jsonProposals = snapshot.val();

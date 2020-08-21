@@ -14,12 +14,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const randomString = require('randomstring');
 const User = require('../../models/User');
-const ethUtils = require('../../services/utils/ethUtils');
-const btcUtils = require('../../services/utils/btcUtils');
-const BitcoinAccount = require('../../models/BitcoinAccount');
-const EthAccount = require('../../models/EthereumAccount');
-const ExchangeBalance = require('../../models/ExchangeBalance');
-const Rewards = require('../../models/Rewards');
 
 const {
     JWT_PASSPHRASE: jwtSecret
@@ -27,54 +21,20 @@ const {
 
 
 module.exports = {
-    // loginKakao: ,
 
     userRegister: async (profile) => {
-        let ethResponse = await ethUtils.createAccount();
-        let btcResponse = await btcUtils.createAccount();
-        console.log(btcResponse.address);
-        console.log(btcResponse.redeem_code);
         // Save user to DB
         let user = await User.create({
             email: "",
             password: "",
             first_name: profile.username,
             last_name: "",
-            wallet_id: profile.id,
-        });
-        // Save btc account to DB
-        let btc = await BitcoinAccount.create({
-            user_id: user.id,
-            wallet_address: btcResponse.address,
-            private_key: btcResponse.redeem_code,
-        });
-        // Save eth account to DB
-        let ethereum = await EthAccount.create({
-            user_id: user.id,
-            wallet_address: ethResponse.address,
-            private_key: ethResponse.privateKey,
-        });
-        // Init Balance to DB
-        let balance = await ExchangeBalance.create({
-            user_id: user.id,
-            eth_balance: 0,
-            pia_balance: 0,
-        });
-
-        let rewards = await Rewards.create({
-            user_id: user.id,
-            eth_reward: 0,
-            btc_reward: 0,
-            deposited_at: new Date(),
+            wallet_id: "",
         });
 
         res = {
             status: true,
             user: user,
-            btc: btc.address,
-            ethereum: ethereum.address,
-            balance: balance,
-            rewards: rewards,
             message: "User created successfully!",
         }
 
